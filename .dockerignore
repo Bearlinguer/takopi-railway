@@ -1,0 +1,31 @@
+# Git
+.git/
+.gitignore
+
+# Python
+dist/
+.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.coverage
+.mutmut-cache/
+mutants/
+
+# Development
+.worktrees/
+research/
+_site/
+docs/
+
+# Tests
+tests/
+
+# IDE
+.vscode/
+.idea/
+
+# Misc
+*.md
+!docker-entrypoint.sh
