@@ -22,6 +22,14 @@ allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch"]
 EOF
 fi
 
+# --- Inject env vars into config (workaround for pydantic string coercion) ---
+if [ -n "$TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN" ]; then
+  sed -i "s|bot_token = \"placeholder\"|bot_token = \"$TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN\"|" "$CONFIG_FILE"
+fi
+if [ -n "$TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID" ]; then
+  sed -i "s|chat_id = 0|chat_id = $TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID|" "$CONFIG_FILE"
+fi
+
 # --- Knowledge vault bootstrap ---
 VAULT="${KNOWLEDGE_PATH:-/data/knowledge}"
 
