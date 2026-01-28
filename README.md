@@ -26,6 +26,14 @@ GITHUB_TOKEN=your_github_token
 TAKOPI_REPOS=owner/repo1,owner/repo2
 ```
 
+### Getting Your Chat ID
+
+For DMs, your chat ID is the same as your user ID. To get it:
+
+1. Message [@userinfobot](https://t.me/userinfobot) on Telegram
+2. It will reply with your user ID
+3. Use that number as `TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID`
+
 ## Structure
 
 ```

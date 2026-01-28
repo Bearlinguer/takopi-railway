@@ -11,8 +11,8 @@ mkdir -p "$CONFIG_DIR"
 # Strip quotes that Railway UI may auto-add to env vars
 BOT_TOKEN="${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN:-placeholder}"
 BOT_TOKEN="${BOT_TOKEN//\"/}"
-ALLOWED_USER_IDS="${TAKOPI__TRANSPORTS__TELEGRAM__ALLOWED_USER_IDS:-}"
-ALLOWED_USER_IDS="${ALLOWED_USER_IDS//\"/}"
+CHAT_ID="${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID:-0}"
+CHAT_ID="${CHAT_ID//\"/}"
 
 cat > "$CONFIG_FILE" << EOF
 default_engine = "claude"
@@ -21,17 +21,9 @@ watch_config = true
 
 [transports.telegram]
 bot_token = "$BOT_TOKEN"
-chat_id = 0
+chat_id = $CHAT_ID
 session_mode = "chat"
 show_resume_line = false
-EOF
-
-# Add allowed_user_ids if provided
-if [ -n "$ALLOWED_USER_IDS" ]; then
-  echo "allowed_user_ids = [$ALLOWED_USER_IDS]" >> "$CONFIG_FILE"
-fi
-
-cat >> "$CONFIG_FILE" << EOF
 
 [claude]
 allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch"]
