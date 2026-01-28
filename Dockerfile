@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install engine CLIs
 RUN npm install -g @anthropic-ai/claude-code @openai/codex
 
-# Install takopi
-RUN uv tool install takopi
+# Install takopi from fix branch
+RUN uv tool install git+https://github.com/asianviking/takopi.git@fix/chat-id-validation
 
 # Persistent data mount point
 WORKDIR /data/github
