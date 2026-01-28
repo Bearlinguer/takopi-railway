@@ -22,6 +22,7 @@ watch_config = true
 [transports.telegram]
 bot_token = "$BOT_TOKEN"
 chat_id = $CHAT_ID
+session_mode = "chat"
 
 [claude]
 allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch"]
