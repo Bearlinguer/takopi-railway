@@ -27,8 +27,14 @@ EOF
 # --- GitHub CLI auth ---
 if [ -n "$GITHUB_TOKEN" ]; then
   GITHUB_TOKEN="${GITHUB_TOKEN//\"/}"
-  echo "$GITHUB_TOKEN" | gh auth login --with-token
-  echo "✓ GitHub CLI authenticated"
+  echo "Attempting GitHub CLI auth (token length: ${#GITHUB_TOKEN})..."
+  if gh_output=$(echo "$GITHUB_TOKEN" | gh auth login --with-token 2>&1); then
+    echo "✓ GitHub CLI authenticated"
+  else
+    echo "⚠ GitHub CLI auth failed - continuing without GitHub integration"
+    echo "  Error: $gh_output"
+    echo "  Hint: Ensure GITHUB_TOKEN has 'repo' scope. Generate at: https://github.com/settings/tokens"
+  fi
 fi
 
 # --- Knowledge vault bootstrap ---
