@@ -132,6 +132,41 @@ if [ ! -L "$CLAUDE_DIR/skills" ]; then
   ln -sf "$SKILLS_DIR" "$CLAUDE_DIR/skills"
 fi
 
+# --- Global CLAUDE.md (agent instructions) ---
+if [ ! -f "$CLAUDE_DIR/CLAUDE.md" ]; then
+  cat > "$CLAUDE_DIR/CLAUDE.md" << 'GLOBALEOF'
+# Global Agent Instructions
+
+## Agent Memory
+
+All sessions write memory to the knowledge vault at `/data/knowledge/`.
+
+### Layer 1: Daily Agent Logs (`/data/knowledge/07-logs/agent/YYYY-MM-DD.md`)
+Append-only notes to remember things for future sessions.
+
+Write here when:
+- A decision is made (with rationale)
+- User preference discovered
+- Important action completed
+- Something to follow up on
+
+Format:
+```markdown
+## HH:MM AM/PM - Topic
+Brief factual note. Decision: X. Reason: Y.
+```
+
+### Layer 2: Long-term Knowledge (`/data/knowledge/03-resources/`)
+Significant learnings get promoted here as curated notes.
+
+### Reading Memory
+At session start (when context matters):
+1. Read `/data/knowledge/MEMORY.md` for persistent context
+2. Read `/data/knowledge/07-logs/agent/` for today + yesterday
+3. Search `/data/knowledge/03-resources/` for relevant context
+GLOBALEOF
+fi
+
 # --- Install default skills ---
 if [ ! -d "$SKILLS_DIR/skill-creator" ]; then
   echo "Installing skill-creator skill..."
