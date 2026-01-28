@@ -8,8 +8,11 @@ CONFIG_FILE="$CONFIG_DIR/takopi.toml"
 mkdir -p "$CONFIG_DIR"
 
 # Always regenerate config with current env var values
+# Strip quotes that Railway UI may auto-add to env vars
 BOT_TOKEN="${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN:-placeholder}"
+BOT_TOKEN="${BOT_TOKEN//\"/}"
 CHAT_ID="${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID:-0}"
+CHAT_ID="${CHAT_ID//\"/}"
 
 cat > "$CONFIG_FILE" << EOF
 default_engine = "claude"
