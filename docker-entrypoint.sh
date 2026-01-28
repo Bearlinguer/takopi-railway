@@ -25,6 +25,7 @@ chat_id = $CHAT_ID
 
 [claude]
 allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch"]
+use_api_billing = true
 EOF
 
 echo "--- Generated takopi config ---"
