@@ -7,19 +7,15 @@ CONFIG_FILE="$CONFIG_DIR/takopi.toml"
 
 mkdir -p "$CONFIG_DIR"
 
-# Always regenerate config with current env var values
-# Only inject chat_id (needs integer coercion); bot_token comes from env at runtime
-CHAT_ID="${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID:-0}"
-CHAT_ID="${CHAT_ID//\"/}"
-
-cat > "$CONFIG_FILE" << EOF
+# Seed config file - env vars override via pydantic-settings at runtime
+cat > "$CONFIG_FILE" << 'EOF'
 default_engine = "claude"
 transport = "telegram"
 watch_config = true
 
 [transports.telegram]
 bot_token = "placeholder"
-chat_id = $CHAT_ID
+chat_id = 0
 session_mode = "chat"
 show_resume_line = false
 
