@@ -8,9 +8,7 @@ CONFIG_FILE="$CONFIG_DIR/takopi.toml"
 mkdir -p "$CONFIG_DIR"
 
 # Always regenerate config with current env var values
-# Strip quotes that Railway UI may auto-add to env vars
-BOT_TOKEN="${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN:-placeholder}"
-BOT_TOKEN="${BOT_TOKEN//\"/}"
+# Only inject chat_id (needs integer coercion); bot_token comes from env at runtime
 CHAT_ID="${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID:-0}"
 CHAT_ID="${CHAT_ID//\"/}"
 
@@ -20,7 +18,7 @@ transport = "telegram"
 watch_config = true
 
 [transports.telegram]
-bot_token = "$BOT_TOKEN"
+bot_token = "placeholder"
 chat_id = $CHAT_ID
 session_mode = "chat"
 show_resume_line = false
@@ -29,10 +27,6 @@ show_resume_line = false
 allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch"]
 use_api_billing = true
 EOF
-
-echo "--- Generated takopi config ---"
-cat "$CONFIG_FILE"
-echo "--- End config ---"
 
 # --- GitHub CLI auth ---
 if [ -n "$GITHUB_TOKEN" ]; then
