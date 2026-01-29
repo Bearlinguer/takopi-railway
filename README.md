@@ -26,6 +26,20 @@ GITHUB_TOKEN=your_github_token
 TAKOPI_REPOS=owner/repo1,owner/repo2
 ```
 
+### Creating Your Telegram Bot
+
+Before deploying, you need to create a bot with BotFather:
+
+1. Open Telegram and search for [@BotFather](https://t.me/botfather)
+2. Start a chat and send `/newbot`
+3. Follow the prompts:
+   - Choose a display name (e.g., "My Takopi Bot")
+   - Choose a unique username ending in "bot" (e.g., "mytakopi_bot")
+4. BotFather will reply with your bot token (looks like `1234567890:ABCdefGHIjklMNOpqrsTUVwxyz`)
+5. Copy this token and use it as `TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN`
+
+**Important:** Keep your bot token secret! Anyone with this token can control your bot.
+
 ### Getting Your Chat ID
 
 For DMs, your chat ID is the same as your user ID. To get it:
