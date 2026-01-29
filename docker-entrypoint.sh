@@ -155,6 +155,8 @@ All sessions write memory to the knowledge vault at `/data/knowledge/`.
 ### Layer 1: Daily Agent Logs (`/data/knowledge/07-logs/agent/YYYY-MM-DD.md`)
 Append-only notes to remember things for future sessions.
 
+IMPORTANT: Proactively and automatically append to daily logs throughout the session without asking. Only ask if unsure whether something qualifies as worth logging.
+
 Write here when:
 - A decision is made (with rationale)
 - User preference discovered
