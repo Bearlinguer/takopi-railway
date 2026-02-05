@@ -32,7 +32,7 @@ extra_args = ["-c", "notify=[]", "--dangerously-bypass-approvals-and-sandbox"]
 
 [claude]
 model = "opus"
-allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch"]
+allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch", "WebFetch"]
 use_api_billing = true
 EOF
 
