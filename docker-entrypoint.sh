@@ -77,16 +77,34 @@ with open('$CONFIG_FILE', 'rb') as f:
         print('TOML parse ERROR:', e)
 " 2>&1 || echo "Python TOML check failed"
 
+# Try loading settings via takopi's own loader to see the real error
+echo "=== Attempting takopi load_settings ==="
+python3 -c "
+import traceback
+try:
+    from takopi.settings import load_settings
+    settings, path = load_settings()
+    print('load_settings OK!')
+    print('transport:', settings.transport)
+    tg = settings.transports.telegram
+    print('bot_token:', repr(tg.bot_token)[:40])
+    print('chat_id:', tg.chat_id)
+except Exception as e:
+    print('load_settings FAILED:', type(e).__name__, str(e))
+    traceback.print_exc()
+" 2>&1 || echo "takopi load_settings check failed"
+echo "=== End takopi load_settings ==="
+
 # --- GitHub CLI auth ---
 if [ -n "$GITHUB_TOKEN" ]; then
   GITHUB_TOKEN="${GITHUB_TOKEN//\"/}"
   echo "Attempting GitHub CLI auth (token length: ${#GITHUB_TOKEN})..."
   if gh_output=$(echo "$GITHUB_TOKEN" | gh auth login --with-token 2>&1); then
-    echo "\u2713 GitHub CLI authenticated"
+    echo "✓ GitHub CLI authenticated"
     gh auth setup-git
-    echo "\u2713 Git configured to use GitHub CLI authentication"
+    echo "✓ Git configured to use GitHub CLI authentication"
   else
-    echo "\u26a0 GitHub CLI auth failed - continuing without GitHub integration"
+    echo "⚠ GitHub CLI auth failed - continuing without GitHub integration"
     echo "  Error: $gh_output"
     echo "  Hint: Ensure GITHUB_TOKEN has 'repo' scope. Generate at: https://github.com/settings/tokens"
   fi
@@ -149,26 +167,26 @@ if [ ! -f "$VAULT/CLAUDE.md" ]; then
 
 ```
 /data/
-\u251c\u2500\u2500 github/      # GitHub repos ONLY
-\u2514\u2500\u2500 knowledge/      # Everything else (notes, docs, memory)
+├── github/      # GitHub repos ONLY
+└── knowledge/      # Everything else (notes, docs, memory)
 ```
 
 ## Where Things Go
 
-### `/data/github/` \u2014 GitHub Repos Only
+### `/data/github/` — GitHub Repos Only
 - Clone all GitHub repos here
 - All coding work happens here
 
-### `/data/knowledge/` \u2014 Everything Else
-- `00-inbox/` \u2014 Quick capture, unsorted notes
-- `01-todos/` \u2014 Task management (inbox.md \u2192 active.md \u2192 arxiv.md)
-- `02-projects/` \u2014 Project context and planning docs
-- `03-resources/` \u2014 Long-term knowledge (Layer 2 memory)
-- `04-claude-code/` \u2014 Claude configs and skills
-- `05-prompts/` \u2014 Prompt library
-- `06-meetings/` \u2014 Meeting notes
-- `07-logs/agent/` \u2014 Daily agent logs (Layer 1 memory)
-- `07-logs/daily/` \u2014 Human journal
+### `/data/knowledge/` — Everything Else
+- `00-inbox/` — Quick capture, unsorted notes
+- `01-todos/` — Task management (inbox.md → active.md → arxiv.md)
+- `02-projects/` — Project context and planning docs
+- `03-resources/` — Long-term knowledge (Layer 2 memory)
+- `04-claude-code/` — Claude configs and skills
+- `05-prompts/` — Prompt library
+- `06-meetings/` — Meeting notes
+- `07-logs/agent/` — Daily agent logs (Layer 1 memory)
+- `07-logs/daily/` — Human journal
 
 ## Agent Memory
 
@@ -195,7 +213,7 @@ At session start:
 VEOF
 fi
 
-echo "\u2713 Knowledge vault ready at $VAULT"
+echo "✓ Knowledge vault ready at $VAULT"
 
 # --- Symlink Claude skills to persistent volume ---
 CLAUDE_DIR="$HOME/.claude"
@@ -264,10 +282,10 @@ Manage scheduled automation for your skills.
 ```
 
 **Actions:**
-- `list` \u2014 Show all cron jobs
-- `add` \u2014 Add a new scheduled job
-- `remove` \u2014 Remove a job
-- `sync` \u2014 Install crontab.txt to system
+- `list` — Show all cron jobs
+- `add` — Add a new scheduled job
+- `remove` — Remove a job
+- `sync` — Install crontab.txt to system
 
 ## Files
 
@@ -303,20 +321,20 @@ crontab $KNOWLEDGE_PATH/04-claude-code/cron/crontab.txt
 ## Cron Schedule Reference
 
 ```
-\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 minute (0-59)
-\u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 hour (0-23)
-\u2502 \u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 day of month (1-31)
-\u2502 \u2502 \u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 month (1-12)
-\u2502 \u2502 \u2502 \u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 day of week (0-6, Sun=0)
-\u2502 \u2502 \u2502 \u2502 \u2502
+┌───────────── minute (0-59)
+│ ┌───────────── hour (0-23)
+│ │ ┌───────────── day of month (1-31)
+│ │ │ ┌───────────── month (1-12)
+│ │ │ │ ┌───────────── day of week (0-6, Sun=0)
+│ │ │ │ │
 * * * * * command
 ```
 
 **Common patterns:**
-- `0 6 * * *` \u2014 Daily at 6am
-- `0 8 * * 0` \u2014 Weekly on Sunday at 8am
-- `0 9 1 * *` \u2014 Monthly on 1st at 9am
-- `*/15 * * * *` \u2014 Every 15 minutes
+- `0 6 * * *` — Daily at 6am
+- `0 8 * * 0` — Weekly on Sunday at 8am
+- `0 9 1 * *` — Monthly on 1st at 9am
+- `*/15 * * * *` — Every 15 minutes
 
 ## Log Output
 
@@ -329,7 +347,7 @@ fi
 
 # Start cron daemon
 cron
-echo "\u2713 Cron daemon started"
+echo "✓ Cron daemon started"
 
 # --- Clone repos if requested ---
 if [ -n "$TAKOPI_REPOS" ]; then
