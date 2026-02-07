@@ -9,15 +9,15 @@ mkdir -p "$CONFIG_DIR"
 
 # Seed config file with all documented defaults
 # Env vars override via pydantic-settings at runtime (TAKOPI__KEY format)
-cat > "$CONFIG_FILE" << EOF
+cat > "$CONFIG_FILE" << 'EOF'
 # Top-level settings
 watch_config = true
 default_engine = "claude"
 transport = "telegram"
 
 [transports.telegram]
-bot_token = "$TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN"
-chat_id = $TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID
+bot_token = "placeholder"
+chat_id = 0
 allowed_user_ids = []
 message_overflow = "split"
 forward_coalesce_s = 1.0
@@ -52,16 +52,41 @@ allowed_tools = ["Bash", "Read", "Edit", "Write", "WebSearch", "WebFetch"]
 use_api_billing = true
 EOF
 
+# Debug: show generated config and env vars
+echo "=== Generated TOML config ==="
+cat "$CONFIG_FILE"
+echo ""
+echo "=== End config ==="
+echo "=== TAKOPI env vars ==="
+env | grep -i TAKOPI || echo "(none found)"
+echo "=== End env vars ==="
+
+# Try running takopi with verbose error output
+echo "=== Attempting config load test ==="
+python3 -c "
+import tomllib, sys
+with open('$CONFIG_FILE', 'rb') as f:
+    try:
+        data = tomllib.load(f)
+        print('TOML parse OK:', list(data.keys()))
+        if 'transports' in data and 'telegram' in data['transports']:
+            tg = data['transports']['telegram']
+            print('bot_token type:', type(tg.get('bot_token')).__name__, 'value:', repr(tg.get('bot_token'))[:30])
+            print('chat_id type:', type(tg.get('chat_id')).__name__, 'value:', repr(tg.get('chat_id')))
+    except Exception as e:
+        print('TOML parse ERROR:', e)
+" 2>&1 || echo "Python TOML check failed"
+
 # --- GitHub CLI auth ---
 if [ -n "$GITHUB_TOKEN" ]; then
   GITHUB_TOKEN="${GITHUB_TOKEN//\"/}"
   echo "Attempting GitHub CLI auth (token length: ${#GITHUB_TOKEN})..."
   if gh_output=$(echo "$GITHUB_TOKEN" | gh auth login --with-token 2>&1); then
-    echo "✓ GitHub CLI authenticated"
+    echo "\u2713 GitHub CLI authenticated"
     gh auth setup-git
-    echo "✓ Git configured to use GitHub CLI authentication"
+    echo "\u2713 Git configured to use GitHub CLI authentication"
   else
-    echo "⚠ GitHub CLI auth failed - continuing without GitHub integration"
+    echo "\u26a0 GitHub CLI auth failed - continuing without GitHub integration"
     echo "  Error: $gh_output"
     echo "  Hint: Ensure GITHUB_TOKEN has 'repo' scope. Generate at: https://github.com/settings/tokens"
   fi
@@ -72,9 +97,9 @@ if [ -n "$OPENAI_API_KEY" ]; then
   OPENAI_API_KEY="${OPENAI_API_KEY//\"/}"
   echo "Attempting Codex CLI auth (token length: ${#OPENAI_API_KEY})..."
   if codex_output=$(echo "$OPENAI_API_KEY" | codex login --with-api-key 2>&1); then
-    echo "✓ Codex CLI authenticated"
+    echo "\u2713 Codex CLI authenticated"
   else
-    echo "⚠ Codex CLI auth failed - continuing without Codex"
+    echo "\u26a0 Codex CLI auth failed - continuing without Codex"
     echo "  Error: $codex_output"
     echo "  Hint: Ensure OPENAI_API_KEY is valid. Generate at: https://platform.openai.com/api-keys"
   fi
@@ -124,26 +149,26 @@ if [ ! -f "$VAULT/CLAUDE.md" ]; then
 
 ```
 /data/
-├── github/      # GitHub repos ONLY
-└── knowledge/      # Everything else (notes, docs, memory)
+\u251c\u2500\u2500 github/      # GitHub repos ONLY
+\u2514\u2500\u2500 knowledge/      # Everything else (notes, docs, memory)
 ```
 
 ## Where Things Go
 
-### `/data/github/` — GitHub Repos Only
+### `/data/github/` \u2014 GitHub Repos Only
 - Clone all GitHub repos here
 - All coding work happens here
 
-### `/data/knowledge/` — Everything Else
-- `00-inbox/` — Quick capture, unsorted notes
-- `01-todos/` — Task management (inbox.md → active.md → arxiv.md)
-- `02-projects/` — Project context and planning docs
-- `03-resources/` — Long-term knowledge (Layer 2 memory)
-- `04-claude-code/` — Claude configs and skills
-- `05-prompts/` — Prompt library
-- `06-meetings/` — Meeting notes
-- `07-logs/agent/` — Daily agent logs (Layer 1 memory)
-- `07-logs/daily/` — Human journal
+### `/data/knowledge/` \u2014 Everything Else
+- `00-inbox/` \u2014 Quick capture, unsorted notes
+- `01-todos/` \u2014 Task management (inbox.md \u2192 active.md \u2192 arxiv.md)
+- `02-projects/` \u2014 Project context and planning docs
+- `03-resources/` \u2014 Long-term knowledge (Layer 2 memory)
+- `04-claude-code/` \u2014 Claude configs and skills
+- `05-prompts/` \u2014 Prompt library
+- `06-meetings/` \u2014 Meeting notes
+- `07-logs/agent/` \u2014 Daily agent logs (Layer 1 memory)
+- `07-logs/daily/` \u2014 Human journal
 
 ## Agent Memory
 
@@ -170,7 +195,7 @@ At session start:
 VEOF
 fi
 
-echo "✓ Knowledge vault ready at $VAULT"
+echo "\u2713 Knowledge vault ready at $VAULT"
 
 # --- Symlink Claude skills to persistent volume ---
 CLAUDE_DIR="$HOME/.claude"
@@ -239,10 +264,10 @@ Manage scheduled automation for your skills.
 ```
 
 **Actions:**
-- `list` — Show all cron jobs
-- `add` — Add a new scheduled job
-- `remove` — Remove a job
-- `sync` — Install crontab.txt to system
+- `list` \u2014 Show all cron jobs
+- `add` \u2014 Add a new scheduled job
+- `remove` \u2014 Remove a job
+- `sync` \u2014 Install crontab.txt to system
 
 ## Files
 
@@ -278,20 +303,20 @@ crontab $KNOWLEDGE_PATH/04-claude-code/cron/crontab.txt
 ## Cron Schedule Reference
 
 ```
-┌───────────── minute (0-59)
-│ ┌───────────── hour (0-23)
-│ │ ┌───────────── day of month (1-31)
-│ │ │ ┌───────────── month (1-12)
-│ │ │ │ ┌───────────── day of week (0-6, Sun=0)
-│ │ │ │ │
+\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 minute (0-59)
+\u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 hour (0-23)
+\u2502 \u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 day of month (1-31)
+\u2502 \u2502 \u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 month (1-12)
+\u2502 \u2502 \u2502 \u2502 \u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 day of week (0-6, Sun=0)
+\u2502 \u2502 \u2502 \u2502 \u2502
 * * * * * command
 ```
 
 **Common patterns:**
-- `0 6 * * *` — Daily at 6am
-- `0 8 * * 0` — Weekly on Sunday at 8am
-- `0 9 1 * *` — Monthly on 1st at 9am
-- `*/15 * * * *` — Every 15 minutes
+- `0 6 * * *` \u2014 Daily at 6am
+- `0 8 * * 0` \u2014 Weekly on Sunday at 8am
+- `0 9 1 * *` \u2014 Monthly on 1st at 9am
+- `*/15 * * * *` \u2014 Every 15 minutes
 
 ## Log Output
 
@@ -304,7 +329,7 @@ fi
 
 # Start cron daemon
 cron
-echo "✓ Cron daemon started"
+echo "\u2713 Cron daemon started"
 
 # --- Clone repos if requested ---
 if [ -n "$TAKOPI_REPOS" ]; then
