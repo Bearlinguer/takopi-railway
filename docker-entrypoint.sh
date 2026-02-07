@@ -9,15 +9,15 @@ mkdir -p "$CONFIG_DIR"
 
 # Seed config file with all documented defaults
 # Env vars override via pydantic-settings at runtime (TAKOPI__KEY format)
-cat > "$CONFIG_FILE" << 'EOF'
+cat > "$CONFIG_FILE" << EOF
 # Top-level settings
 watch_config = true
 default_engine = "claude"
 transport = "telegram"
 
 [transports.telegram]
-bot_token = "placeholder"
-chat_id = 0
+bot_token = "$TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN"
+chat_id = $TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID
 allowed_user_ids = []
 message_overflow = "split"
 forward_coalesce_s = 1.0
