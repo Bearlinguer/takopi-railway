@@ -349,6 +349,27 @@ fi
 cron
 echo "✓ Cron daemon started"
 
+# --- Daily digest cron (Grok-powered morning news) ---
+DIGEST_HOUR="${DIGEST_CRON_HOUR_UTC:-7}"
+if [ -n "$GROK_API_KEY" ]; then
+  # Cron runs with minimal env — write required vars to a file and source before running
+  ENV_FILE="/etc/daily_digest.env"
+  {
+    echo "GROK_API_KEY=${GROK_API_KEY}"
+    echo "TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN=${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN}"
+    echo "TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID=${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID}"
+    echo "DIGEST_TOPICS=${DIGEST_TOPICS:-}"
+    echo "GROK_MODEL=${GROK_MODEL:-grok-4-1-fast}"
+  } > "$ENV_FILE"
+  chmod 600 "$ENV_FILE"
+
+  CRON_LINE="0 ${DIGEST_HOUR} * * * . ${ENV_FILE} && /usr/local/bin/python3 /usr/local/bin/daily_digest.py >> /data/knowledge/07-logs/.cron.log 2>&1"
+  (crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
+  echo "✓ Daily digest scheduled at ${DIGEST_HOUR}:00 UTC"
+else
+  echo "⚠ GROK_API_KEY not set — daily digest disabled"
+fi
+
 # --- Clone repos if requested ---
 if [ -n "$TAKOPI_REPOS" ]; then
   IFS=',' read -ra REPOS <<< "$TAKOPI_REPOS"

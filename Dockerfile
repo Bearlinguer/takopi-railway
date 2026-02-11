@@ -16,5 +16,8 @@ WORKDIR /data
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
+COPY daily_digest.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/daily_digest.py
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["takopi"]
