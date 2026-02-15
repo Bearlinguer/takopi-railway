@@ -355,16 +355,16 @@ if [ -n "$ANTHROPIC_API_KEY" ] || [ -n "$OPENAI_API_KEY" ]; then
   # Cron runs with minimal env — write required vars to a file and source before running
   ENV_FILE="/etc/daily_digest.env"
   {
-    echo "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}"
-    echo "OPENAI_API_KEY=${OPENAI_API_KEY:-}"
-    echo "TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN=${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN}"
-    echo "TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID=${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID}"
-    echo "DIGEST_TOPICS=${DIGEST_TOPICS:-}"
+    echo "export ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY:-}'"
+    echo "export OPENAI_API_KEY='${OPENAI_API_KEY:-}'"
+    echo "export TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN='${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN}'"
+    echo "export TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID='${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID}'"
+    echo "export DIGEST_TOPICS='${DIGEST_TOPICS:-}'"
   } > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
 
-  CRON_LINE="0 ${DIGEST_HOUR} * * * . ${ENV_FILE} && /usr/local/bin/python3 /usr/local/bin/daily_digest.py >> /proc/1/fd/1 2>&1"
-  (crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
+  CRON_LINE="0 ${DIGEST_HOUR} * * * /bin/bash -c '. ${ENV_FILE} && /usr/local/bin/python3 /usr/local/bin/daily_digest.py' >> /proc/1/fd/1 2>&1"
+  (echo "PATH=/usr/local/bin:/usr/bin:/bin"; crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
   echo "✓ Daily digest scheduled at ${DIGEST_HOUR}:00 UTC"
 else
   echo "⚠ No AI API key set — daily digest disabled"
