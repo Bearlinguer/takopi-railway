@@ -349,22 +349,24 @@ fi
 cron
 echo "✓ Cron daemon started"
 
-# --- Daily digest cron (Claude + OpenAI powered morning news) ---
+# --- Daily digest scheduler (background loop, not cron — avoids env/logging issues) ---
 DIGEST_HOUR="${DIGEST_CRON_HOUR_UTC:-7}"
 if [ -n "$ANTHROPIC_API_KEY" ] || [ -n "$OPENAI_API_KEY" ]; then
-  # Cron runs with minimal env — write required vars to a file and source before running
-  ENV_FILE="/etc/daily_digest.env"
-  {
-    echo "export ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY:-}'"
-    echo "export OPENAI_API_KEY='${OPENAI_API_KEY:-}'"
-    echo "export TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN='${TAKOPI__TRANSPORTS__TELEGRAM__BOT_TOKEN}'"
-    echo "export TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID='${TAKOPI__TRANSPORTS__TELEGRAM__CHAT_ID}'"
-    echo "export DIGEST_TOPICS='${DIGEST_TOPICS:-}'"
-  } > "$ENV_FILE"
-  chmod 600 "$ENV_FILE"
-
-  CRON_LINE="0 ${DIGEST_HOUR} * * * /bin/bash -c '. ${ENV_FILE} && /usr/local/bin/python3 /usr/local/bin/daily_digest.py' >> /proc/1/fd/1 2>&1"
-  (echo "PATH=/usr/local/bin:/usr/bin:/bin"; crontab -l 2>/dev/null; echo "$CRON_LINE") | crontab -
+  (
+    LAST_RUN=""
+    echo "✓ Daily digest scheduler started (${DIGEST_HOUR}:00 UTC)"
+    while true; do
+      CURRENT_HOUR=$(date -u +%H | sed 's/^0//')
+      TODAY=$(date -u +%Y-%m-%d)
+      if [ "$CURRENT_HOUR" = "$DIGEST_HOUR" ] && [ "$LAST_RUN" != "$TODAY" ]; then
+        echo "[digest] Running daily digest at $(date -u)..."
+        /usr/local/bin/python3 /usr/local/bin/daily_digest.py 2>&1
+        LAST_RUN="$TODAY"
+        echo "[digest] Done at $(date -u)"
+      fi
+      sleep 30
+    done
+  ) &
   echo "✓ Daily digest scheduled at ${DIGEST_HOUR}:00 UTC"
 else
   echo "⚠ No AI API key set — daily digest disabled"
